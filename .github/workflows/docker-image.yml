@@ -50,7 +50,7 @@ jobs:
         uses: redhat-actions/push-to-registry@v2
         with:
           image: ${{ env.IMG_NAME }}
-          tags: ${{ steps.build-image.outputs.tags }}
+          tags:  ${{ steps.metadata.outputs.tags }}
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GIT_TOKEN }}
