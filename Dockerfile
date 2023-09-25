@@ -9,11 +9,11 @@ ENV USER_NAME byte
 ENV USER_HOME /home/byte
 
 RUN apt update \
-      && apt upgrade -y \
-      && apt dist-upgrade -y \
-      && apt autoremove -y \
-      && apt autoclean -y \
-      && apt clean -y \
+      && apt-get upgrade -y \
+      && apt-get dist-upgrade -y \
+      && apt-get autoremove -y \
+      && apt-get autoclean -y \
+      && apt-get clean -y \
       && useradd -ms /bin/bash -u $USER_UID $USER_NAME \
       && rm -rf /var/lib/apt/lists/* /var/lib/log/* /tmp/* /var/tmp/*
 
