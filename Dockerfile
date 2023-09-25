@@ -9,7 +9,7 @@ ENV USER_NAME byte
 ENV USER_HOME /home/byte
 
 RUN apt update \
-    apt upgrade -y \
+      && apt upgrade -y \
       && sudo apt dist-upgrade -y \
       && sudo apt autoremove -y \
       && sudo apt autoclean -y \
