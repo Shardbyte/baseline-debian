@@ -1,53 +1,20 @@
-name: Docker image
-on:
-  push:
-    branches:
-      - '*'
-    tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+'
-  pull_request:
-    branches:
-      - '*'
+FROM debian:bookworm
 
-jobs:
-  build:
-    name: Build & push docker image
-    runs-on: ubuntu-latest
-    env:
-      IMG_NAME: ${{ github.repository }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4.0.0
+LABEL maintainer="Shardbyte <saint@shardbyte.com>"
 
-      - name: Info
-        run: echo "Parameters. ${{ github.event.base_ref }}, ${{ github.ref_type }}, ${{ github.ref }}"
-      - name: Docker metadata
-        id: metadata
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.IMG_NAME }}
-          tags: |
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=raw,value=dev-{{date 'YYYYMMDDhhmm'}}.{{sha}},enable=${{ github.ref_type != 'tag' }}
+ENV DEBIAN_FRONTEND noninteractive
+ENV TERM xterm
+ENV USER_UID 1000
+ENV USER_NAME byte
+ENV USER_HOME /home/byte
 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+RUN apt update \
+    apt upgrade -y \
+      && sudo apt dist-upgrade -y \
+      && sudo apt autoremove -y \
+      && sudo apt autoclean -y \
+      && sudo apt clean -y \
+      && useradd -ms /bin/bash -u $USER_UID $USER_NAME \
+      && rm -rf /var/lib/apt/lists/* /var/lib/log/* /tmp/* /var/tmp/*
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: ${{ github.event.base_ref =='refs/heads/main' && github.ref_type == 'tag' && !startsWith(github.ref, 'refs/tags/v0.')}}
-          tags: ${{ steps.metadata.outputs.tags }}
-          labels: ${{ steps.metadata.outputs.labels }}
-
-      - name: Create release
-        uses: josephrodriguez/swift-release@v1
-        if: ${{ startsWith(github.ref, 'refs/tags/') }}
-        with:
-          token: ${{ secrets.GIT_TOKEN }}
-          prerelease: ${{ contains(github.ref, 'alpha') || contains(github.ref, 'beta') || contains(github.ref, 'rc') }}          
+CMD ["/bin/bash"]
